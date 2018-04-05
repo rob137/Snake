@@ -23,7 +23,7 @@ function ensureNumsAreUnique (headNum, foodNum) {
   return { headNum, foodNum }; 
 }
 
-function setSquare (gridNum, className) {
+function setSquare(gridNum, className) {
   document.getElementsByClassName(`grid-square-${gridNum}`)[0].classList.add(`${className}`);
 }
 
@@ -34,12 +34,29 @@ function setInitialConditions() {
   setSquare(foodNum, 'food');
 }
 
+function getHeadPosition() {
+  return  document.getElementsByClassName(`snake-head`)[0];
+}
+
+function removeHead(currentPosition) {
+  document.getElementsByClassName(`snake-head`)[0].className = currentPosition.className
+    .slice(0, -11);;
+}
+
+function moveHead(currentPosition) {
+  const currentGridNum = parseInt(currentPosition.className.replace(/[^0-9\.]/g, ''));
+  const nextGridNum = currentGridNum - 1;
+  setSquare(nextGridNum, 'snake-head');
+}
+
 function advanceSnake() {
-  console.log(document.getElementsByClassName(`snake-head`)[0].className);
+  const currentPosition = getHeadPosition();
+  removeHead(currentPosition);
+  moveHead(currentPosition);
 }
 
 function startMovingSnake() {
-  setInterval(() => advanceSnake(), 500)
+  setInterval(() => advanceSnake(), 200);
 }
 
 function handleKeyPress(keyPressed) {

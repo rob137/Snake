@@ -16,7 +16,7 @@
 .grid-square {
   width: 15px;
   height: 15px;
-  border: 0.2px black solid;
+  border: 0.2px rgb(238, 238, 238) solid;
   display: inline-grid;
 }
 
@@ -25,9 +25,9 @@
 }
 
 .snake-body {
-  background-color: green;
+  background-color: rgb(54, 192, 54);
 }
 
 .snake-head {
-  background-color: rgb(8, 63, 8);
+  background-color: green;
 }
