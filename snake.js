@@ -139,7 +139,7 @@ const food = {
   }
 }
 
-function prepareGrid(size) {
+const prepareGrid = (size) => {
   let elementNum = 0
   const grid = [];
   for (let i = 1; i <= size; i++) {
@@ -156,14 +156,14 @@ function prepareGrid(size) {
   return grid;
 }
 
-function createGrid() {
+const createGrid = () => {
   const max = gridArr.length;
   for (let i = 0; i < max; i++) {
     gridContainer.innerHTML += `<div class="grid-square grid-square-${i}"></div>`;
   }
 }
 
-function handleKeyPress(keyPressed) {
+const handleKeyPress = (keyPressed) => {
   if (keyPressed === 'ArrowUp') {
     head.proposedDirection = 'up';
   } else if (keyPressed === "ArrowDown") {
@@ -175,11 +175,9 @@ function handleKeyPress(keyPressed) {
   }
 }
 
-function lookupGridElement(x, y) {
-  return gridArr.find(i => i.x === x && i.y === y);
-}
+const lookupGridElement = (x, y) => gridArr.find(i => i.x === x && i.y === y);
 
-function pickRandomCoords() {
+const pickRandomCoords = () => {
   const x = Math.floor(Math.random()*maxX);
   const y = Math.floor(Math.random()*maxY);
   const gridElement = lookupGridElement(x, y);
@@ -191,27 +189,23 @@ function pickRandomCoords() {
   return {x, y};
 }
 
-function setInitialCoords(entity) {
+const setInitialCoords = (entity) => {
   let initialCoords = pickRandomCoords();
   entity.x = initialCoords.x, 
   entity.y = initialCoords.y
 }
 
-function listenForInput() {
-  window.addEventListener('keydown', (e) => handleKeyPress(e.key));
-}
+const listenForInput = () => window.addEventListener('keydown', (e) => handleKeyPress(e.key));
 
-function placeEntities() {
+const placeEntities = () => {
   head.reassign();
   food.reassign();
 }
 
-function startMovingSnake(miliseconds) {
-  refreshIntervalId = setInterval(() => head.move(), miliseconds);
-}
+const startMovingSnake = (miliseconds) => refreshIntervalId = setInterval(() => head.move(), miliseconds);
 
 // for starting/resetting
-function startGame(miliseconds) {
+const startGame =(miliseconds) => {
   head.length = 1;
   placeEntities();
   startMovingSnake(miliseconds);
@@ -219,7 +213,7 @@ function startGame(miliseconds) {
 }
 
 // preps the grid, starts initial game
-function setUp(size, miliseconds) {
+const setUp = (size, miliseconds) => {
   gridArr = prepareGrid(size);
   maxX = gridArr[gridArr.length-1].x;
   maxY = gridArr[gridArr.length-1].y;
