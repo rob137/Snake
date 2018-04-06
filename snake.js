@@ -10,7 +10,7 @@ const head = {
   // coords
   x: 1,
   y: 2,
-  bodyLength: 3,
+  bodyLength: 20,
   direction: "left",
   proposedDirection: "left",
   // Validates user input
@@ -48,9 +48,10 @@ const head = {
     if (currentHeadLocation) {
       currentHeadLocation.className = currentHeadLocation.className.replace('head', '');
     }
-    if (!nextHeadLocation.empty) {
+    if (document.getElementsByClassName(nextHeadLocation.elementName)[0].className.search('body') > 0 || document.getElementsByClassName(nextHeadLocation.elementName)[0].className.search('food') > 0) {
+      console.log(nextHeadLocation);
       this.handleCollision(nextHeadLocation);
-    }
+    } 
     document.getElementsByClassName(nextHeadLocation.elementName)[0].classList.add(head.name);
     nextHeadLocation.empty = false;
   },
@@ -104,13 +105,13 @@ const head = {
     }
 
     // sets the trailing empty square in gridArr to 'empty: true' (most recent square behind the snake)
-    let a = document.getElementsByClassName('body');
-    if (a.length > 1) {
-      a = Array.prototype
+    let bodyArr = document.getElementsByClassName('body');
+    if (bodyArr.length > 1) {
+      bodyArr = Array.prototype
         .slice
-        .call(a)
+        .call(bodyArr)
         .sort((i, j) => i.className < j.className);
-      let num = a[0].className.match(/\d+/)[0];
+      let num = bodyArr[0].className.match(/\d+/)[0];
       let targetGrid = gridArr.find(i => i.elementName === `grid-square-${num}`);
       targetGrid.empty = true;
     }
@@ -202,10 +203,13 @@ const placeEntities = () => {
   food.reassign();
 };
 
-const startMovingSnake = (miliseconds) => refreshIntervalId = setInterval(() => head.move(), miliseconds);
+const startMovingSnake = (miliseconds) => refreshIntervalId = setInterval(() => {
+  head.move();
+  console.log(gridArr.filter(a => a.empty === false));
+}, miliseconds);
 
 // for starting/resetting
-const startGame =(miliseconds) => {
+const startGame = (miliseconds) => {
   head.length = 1;
   placeEntities();
   startMovingSnake(miliseconds);
