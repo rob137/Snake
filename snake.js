@@ -1,8 +1,9 @@
+/*jshint esversion: 6 */
 const gridContainer = document.getElementsByClassName('grid-container')[0];
 let gridArr = [];
 let maxX, maxY;
 let refreshIntervalId;
-let timeout = 150;
+let timeout = 100;
 
 // Main snake object.  Contains methods governing its behaviour.
 const head = {
@@ -15,11 +16,11 @@ const head = {
   proposedDirection: "left",
   // Validates user input
   checkDirectionShouldChange: function() {
-    return this.direction !== this.proposedDirection
-      && !(this.direction === 'up' && this.proposedDirection === 'down')
-      && !(this.direction === 'down' && this.proposedDirection === 'up')
-      && !(this.direction === 'left' && this.proposedDirection === 'right') 
-      && !(this.direction === 'right' && this.proposedDirection === 'left');
+    return this.direction !== this.proposedDirection &&
+      !(this.direction === 'up' && this.proposedDirection === 'down') &&
+      !(this.direction === 'down' && this.proposedDirection === 'up') &&
+      !(this.direction === 'left' && this.proposedDirection === 'right') &&
+      !(this.direction === 'right' && this.proposedDirection === 'left');
   },
   // prevents 'doubling back' hack
   setDirection: function() {
@@ -36,7 +37,6 @@ const head = {
     } else {
       // Need to reset game here
       clearInterval(refreshIntervalId);
-      startGame(timeout);
       console.log('stopped!');
     }
   },
@@ -63,7 +63,7 @@ const head = {
     if (this.direction === 'up') {
       this.y -= 1;
     } else if (this.direction === 'down') {
-      this.y += 1;lookupGridElement
+      this.y += 1;
     } else if (this.direction === 'left') {
       this.x -= 1;
     } else if (this.direction === 'right') {
@@ -75,7 +75,7 @@ const head = {
       this.x = maxX;
     } else if (this.y === 0) {
       this.y = maxY;
-    } else if (this.x === maxX+1) {headfunction
+    } else if (this.x === maxX+1) {
       this.x = 1;
     } else if (this.y === maxY+1) {
       this.y = 1;
@@ -85,7 +85,7 @@ const head = {
     document.getElementsByClassName(lookupGridElement(head.x, head.y).elementName)[0].classList.add('1');
   },
   grow: function() {
-    this.bodyLength += 1
+    this.bodyLength += 1;
   },
 
   // Needs refactor!
@@ -105,18 +105,18 @@ const head = {
     }
 
     // sets the trailing empty square in gridArr to 'empty: true' (most recent square behind the snake)
-    let a = document.getElementsByClassName('body')
+    let a = document.getElementsByClassName('body');
     if (a.length > 1) {
       a = Array.prototype
         .slice
         .call(a)
-        .sort((i, j) => i.className < j.className)
+        .sort((i, j) => i.className < j.className);
       let num = a[0].className.match(/\d+/)[0];
       let targetGrid = gridArr.find(i => i.elementName === `grid-square-${num}`);
       targetGrid.empty = true;
     }
   }
-}
+};
 
 const food = {
   name: 'food',
@@ -138,10 +138,10 @@ const food = {
     nextFoodLocation.empty = false;
     document.getElementsByClassName(nextFoodLocation.elementName)[0].classList.add(food.name);
   }
-}
+};
 
 const prepareGrid = (size) => {
-  let elementNum = 0
+  let elementNum = 0;
   const grid = [];
   for (let i = 1; i <= size; i++) {
     for (let j = 1; j <= size; j++) {
@@ -155,14 +155,14 @@ const prepareGrid = (size) => {
     }
   }
   return grid;
-}
+};
 
 const createGrid = () => {
   const max = gridArr.length;
   for (let i = 0; i < max; i++) {
     gridContainer.innerHTML += `<div class="grid-square grid-square-${i}"></div>`;
   }
-}
+};
 
 const handleKeyPress = (keyPressed) => {
   if (keyPressed === 'ArrowUp') {
@@ -174,7 +174,7 @@ const handleKeyPress = (keyPressed) => {
   } else if (keyPressed === "ArrowRight") {
     head.proposedDirection = 'right';
   }
-}
+};
 
 const lookupGridElement = (x, y) => gridArr.find(i => i.x === x && i.y === y);
 
@@ -184,24 +184,24 @@ const pickRandomCoords = () => {
   const gridElement = lookupGridElement(x, y);
 
   // ensure coords are for empty square
-  if (!gridElement.empty) {
+  if (!gridElement || !gridElement.empty) {
     let {x, y} = pickRandomCoords();
   }
   return {x, y};
-}
+};
 
 const setInitialCoords = (entity) => {
   let initialCoords = pickRandomCoords();
-  entity.x = initialCoords.x, 
-  entity.y = initialCoords.y
-}
+  entity.x = initialCoords.x;
+  entity.y = initialCoords.y;
+};
 
 const listenForInput = () => window.addEventListener('keydown', (e) => handleKeyPress(e.key));
 
 const placeEntities = () => {
   head.reassign();
   food.reassign();
-}
+};
 
 const startMovingSnake = (miliseconds) => refreshIntervalId = setInterval(() => head.move(), miliseconds);
 
@@ -211,7 +211,7 @@ const startGame =(miliseconds) => {
   placeEntities();
   startMovingSnake(miliseconds);
   listenForInput();
-}
+};
 
 // preps the grid, starts initial game
 const setUp = (size, miliseconds) => {
@@ -221,6 +221,6 @@ const setUp = (size, miliseconds) => {
   createGrid();
   setInitialCoords(head); 
   startGame(miliseconds);
-}
+};
 
 setUp(50, timeout);
