@@ -1,9 +1,7 @@
 .grid-container {
   position: relative;
   left: 50%;
-
   transform: translateX(-50%);
-
   width: 95vw;
   height: 95vh;
   display: grid;
