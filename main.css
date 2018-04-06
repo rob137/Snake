@@ -4,6 +4,8 @@
   transform: translateX(-50%);
   width: 95vw;
   height: 95vh;
+  max-width: 95vh;
+  max-height: 95vw;
   display: grid;
   grid-template-columns: /* hardcoded to 50 columns - needs adjusting from js for dynamically sized grid */
     auto auto auto auto auto auto auto 
