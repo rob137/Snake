@@ -36,6 +36,7 @@ const head = {
     } else {
       // Need to reset game here
       clearInterval(refreshIntervalId);
+      startGame(timeout);
       console.log('stopped!');
     }
   },
@@ -74,7 +75,7 @@ const head = {
       this.x = maxX;
     } else if (this.y === 0) {
       this.y = maxY;
-    } else if (this.x === maxX+1) {head
+    } else if (this.x === maxX+1) {headfunction
       this.x = 1;
     } else if (this.y === maxY+1) {
       this.y = 1;
