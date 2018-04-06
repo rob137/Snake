@@ -1,85 +1,149 @@
 const gridContainer = document.getElementsByClassName('grid-container')[0];
+let gridArr = [];
+let finalElement;
 
-function createGrid () {
-  for (let i = 0; i < 2000; i++) {
+const head = {
+  name: 'head',
+  x: 1,
+  y: 2,
+  direction: "left",
+  proposedDirection: "left",
+  checkDirectionShouldChange: function() {
+    return this.direction !== this.proposedDirection
+      && !(this.direction === 'up' && this.proposedDirection === 'down')
+      && !(this.direction === 'down' && this.proposedDirection === 'up')
+      && !(this.direction === 'left' && this.proposedDirection === 'right') 
+      && !(this.direction === 'right' && this.proposedDirection === 'left');
+  },
+  // prevents a 'doubling back' hack
+  setDirection: function() {
+    if (this.checkDirectionShouldChange()) {
+      this.direction = this.proposedDirection;
+    }
+  },
+
+  reassign: function() {
+    const nextHeadLocation = gridArr.find((i) => {
+      return i.x === head.x && i.y === head.y;
+    });
+    const currentHeadLocation = document.getElementsByClassName(`head`)[0];
+    if (currentHeadLocation) {
+      currentHeadLocation.className = currentHeadLocation.className.replace('head', '');
+    }
+    document.getElementsByClassName(nextHeadLocation.elementName)[0].classList.add(head.name);
+  },
+  move: function() {
+    this.setDirection();
+    if (this.direction === 'up') {
+      this.y -= 1;
+    } else if (this.direction === 'down') {
+      this.y += 1;
+    } else if (this.direction === 'left') {
+      this.x -= 1;
+    } else if (this.direction === 'right') {
+      this.x += 1;
+    }
+
+    if (this.x === 0) {
+      this.x = finalElement.x;
+    } else if (this.y === 0) {
+      this.y = finalElement.y;
+    } else if (this.x === finalElement.x+1) {
+      this.x = 1;
+    } else if (this.y === finalElement.y+1) {
+      this.y = 1;
+    }
+    this.reassign()
+  },
+}
+
+const food = {
+  name: 'food',
+  x: 2,
+  y: 3,
+  reassign: function() {
+    // place on a random ---empty--- square
+    const newFoodCoords = pickRandomCoords();
+    this.x = newFoodCoords.x;
+    this.y = newFoodCoords.y;
+    const nextFoodLocation = gridArr.find((i) => {
+      return i.x === this.x && i.y === this.y;
+    });
+    document.getElementsByClassName(nextFoodLocation.elementName)[0].classList.add(food.name);
+  }
+}
+
+function prepareCoords(size) {
+  let elementNum = 0
+  const grid = [];
+  for (let i = 1; i <= size; i++) {
+    for (let j = 1; j <= size; j++) {
+      grid.push({
+        y: i,
+        x: j, 
+        empty: true,
+        elementName: `grid-square-${elementNum}`
+      });
+      elementNum += 1;
+    }
+  }
+  return grid;
+}
+
+function createGrid() {
+  const max = gridArr.length;
+  for (let i = 0; i < max; i++) {
     gridContainer.innerHTML += `<div class="grid-square grid-square-${i}"></div>`;
   }
-} 
-
-function setNums() {
-  initialHeadNum = Math.floor(Math.random()*2008);
-  initialFoodNum = Math.floor(Math.random()*2008);
-  return { initialHeadNum, initialFoodNum };
-}
-
-function ensureNumsAreUnique (headNum, foodNum) {
-  if (headNum !== foodNum) {
-    return { headNum, foodNum }; 
-  } else if (headNum < 2000) {
-    headNum += 1;
-  } else {
-    headNum -= 1;
-  }
-  return { headNum, foodNum }; 
-}
-
-function setSquare(gridNum, className) {
-  document.getElementsByClassName(`grid-square-${gridNum}`)[0].classList.add(`${className}`);
-}
-
-function setInitialConditions() {
-  let {initialHeadNum, initialFoodNum} = setNums();
-  let {headNum, foodNum} = ensureNumsAreUnique(initialHeadNum, initialFoodNum);
-  setSquare(headNum, 'snake-head');
-  setSquare(foodNum, 'food');
-}
-
-function getHeadPosition() {
-  return  document.getElementsByClassName(`snake-head`)[0];
-}
-
-function removeHead(currentPosition) {
-  document.getElementsByClassName(`snake-head`)[0].className = currentPosition.className
-    .slice(0, -11);;
-}
-
-function moveHead(currentPosition) {
-  const currentGridNum = parseInt(currentPosition.className.replace(/[^0-9\.]/g, ''));
-  const nextGridNum = currentGridNum - 1;
-  setSquare(nextGridNum, 'snake-head');
-}
-
-function advanceSnake() {
-  const currentPosition = getHeadPosition();
-  removeHead(currentPosition);
-  moveHead(currentPosition);
-}
-
-function startMovingSnake() {
-  setInterval(() => advanceSnake(), 200);
 }
 
 function handleKeyPress(keyPressed) {
   if (keyPressed === 'ArrowUp') {
-    console.log('Up!');
+    head.proposedDirection = 'up';
   } else if (keyPressed === "ArrowDown") {
-    console.log('Down!');
-  } else if (keyPressed === "ArrowLeft") {
-    console.log('Left!');
+    head.proposedDirection = 'down';
+  } else if (keyPressed === "ArrowLeft" ) {
+    head.proposedDirection = 'left';
   } else if (keyPressed === "ArrowRight") {
-    console.log('Right!');
+    head.proposedDirection = 'right';
   }
+}
+
+function pickRandomCoords() {
+  const maxSize = finalElement.x;
+  const x = Math.floor(Math.random()*maxSize);
+  const y = Math.floor(Math.random()*maxSize);
+  return {x, y};
+}
+
+function setInitialCoords(entity) {
+  let initialCoords = pickRandomCoords();
+  entity.x = initialCoords.x, 
+  entity.y = initialCoords.y
+  //let {headNum, foodNum} = ensureCoordsAreUnique(initialHeadNum, initialFoodNum);
 }
 
 function listenForInput() {
   window.addEventListener('keydown', (e) => handleKeyPress(e.key));
 }
 
-function setUp() {
-  createGrid();
-  setInitialConditions(); 
-  startMovingSnake();
+function placeEntities() {
+  head.reassign();
+  food.reassign();
 }
 
-setUp();
+function startMovingSnake(miliseconds) {
+  setInterval(() => head.move(), miliseconds);
+}
+
+function setUp(size, miliseconds) {
+  gridArr = prepareCoords(size);
+  finalElement = gridArr[gridArr.length-1];
+  createGrid();
+  setInitialCoords(head); 
+  placeEntities();
+  startMovingSnake(miliseconds);
+}
+
+setUp(50, 250);
 listenForInput();
