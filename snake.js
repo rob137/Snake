@@ -4,7 +4,7 @@ let maxX, maxY;
 let refreshIntervalId;
 let timeout = 75;
 
-// Main snake object.  Contains methods governing its behaviour.
+// Main snake object.  Contains methods that govern snake's behaviour.
 const head = {
   name: 'head',
   // coords
@@ -29,10 +29,11 @@ const head = {
   },
   // With snake body or food
   handleCollision: function(nextHeadLocation) {
-    const nextElement = document.getElementsByClassName(nextHeadLocation.elementName)[0];
-    if (nextElement.className.search('food') > -1) {
+    // For collision with food
+    if (checkLocationClass(nextHeadLocation, 'food')) {
       food.reassign();
       this.grow();
+      // for collision with body
     } else {
       // Need to reset game here
       clearInterval(refreshIntervalId);
@@ -48,7 +49,8 @@ const head = {
     if (currentHeadLocation) {
       currentHeadLocation.className = currentHeadLocation.className.replace('head', '');
     }
-    if (document.getElementsByClassName(nextHeadLocation.elementName)[0].className.search('body') > 0 || document.getElementsByClassName(nextHeadLocation.elementName)[0].className.search('food') > 0) {
+    if (checkLocationClass(nextHeadLocation, 'body') || checkLocationClass(nextHeadLocation, 'food')) {
+      console.log(1);
       this.handleCollision(nextHeadLocation);
     } 
     document.getElementsByClassName(nextHeadLocation.elementName)[0].classList.add(head.name);
@@ -138,6 +140,12 @@ const food = {
     document.getElementsByClassName(nextFoodLocation.elementName)[0].classList.add(food.name);
   }
 };
+
+
+// Checks if a given grid square has a class
+const checkLocationClass = (location, searchTerm) => {
+  return document.getElementsByClassName(location.elementName)[0].className.search(`${searchTerm}`) > -1;
+}
 
 const prepareGrid = (size) => {
   let elementNum = 0;

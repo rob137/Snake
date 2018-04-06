@@ -1,5 +1,11 @@
 .grid-container {
-  width: 400px;
+  position: relative;
+  left: 50%;
+
+  transform: translateX(-50%);
+
+  width: 95vw;
+  height: 95vh;
   display: grid;
   grid-template-columns: /* hardcoded to 50 columns - needs adjusting from js for dynamically sized grid */
     auto auto auto auto auto auto auto 
@@ -14,8 +20,6 @@
 }
 
 .grid-square {
-  width: 15px;
-  height: 15px;
   border: 0.2px rgb(255, 250, 250) solid;
   display: inline-grid;
 }
@@ -33,4 +37,10 @@
 .head {
   background-color: green;
   border-radius: 5px;
+}
+
+.feedback {
+  color: rgb(2, 56, 2);
+  font-weight: bold; 
+  text-align: center;
 }
