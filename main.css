@@ -22,12 +22,15 @@
 
 .food {
   background-color: blue;
+  border-radius: 5px;
 }
 
 .body {
   background-color: rgb(54, 192, 54);
+  border-radius: 2px;
 }
 
 .head {
   background-color: green;
+  border-radius: 5px;
 }

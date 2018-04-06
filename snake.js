@@ -2,15 +2,18 @@ const gridContainer = document.getElementsByClassName('grid-container')[0];
 let gridArr = [];
 let maxX, maxY;
 let refreshIntervalId;
-let timeout = 200;
+let timeout = 150;
 
+// Main snake object.  Contains methods governing its behaviour.
 const head = {
   name: 'head',
+  // coords
   x: 1,
   y: 2,
   bodyLength: 3,
   direction: "left",
   proposedDirection: "left",
+  // Validates user input
   checkDirectionShouldChange: function() {
     return this.direction !== this.proposedDirection
       && !(this.direction === 'up' && this.proposedDirection === 'down')
@@ -24,6 +27,7 @@ const head = {
       this.direction = this.proposedDirection;
     }
   },
+  // With snake body or food
   handleCollision: function(nextHeadLocation) {
     const nextElement = document.getElementsByClassName(nextHeadLocation.elementName)[0];
     if (nextElement.className.search('food') > -1) {
@@ -48,7 +52,6 @@ const head = {
       this.handleCollision(nextHeadLocation);
     }
     document.getElementsByClassName(nextHeadLocation.elementName)[0].classList.add(head.name);
-    
     nextHeadLocation.empty = false;
   },
   
@@ -84,12 +87,32 @@ const head = {
     this.bodyLength += 1
   },
 
+  // Needs refactor!
   // removes body/head from squares as snake moves
   cleanUp: function() {
     // remove last snake square
-    let target = document.getElementsByClassName(`${1}`)[0];
-    if (target) {
-      target.className = target.className.replace(`${1}`, ``);
+    let finalBodySquare = document.getElementsByClassName(`${head.bodyLength}`)[0];
+    if (finalBodySquare) {                                                            
+      finalBodySquare.className = finalBodySquare.className.replace(` ${head.bodyLength} body`, ``);
+    }
+    // increment remaining body squares
+    for (var i = head.bodyLength-1; i > 0; i--) {
+      let target = document.getElementsByClassName(`${i}`)[0];
+      if (target) {                              // hack for now!
+        target.className = target.className.replace('body', '').replace(` ${i}`, ` ${i+1} body`);
+      } 
+    }
+
+    // sets the trailing empty square in gridArr to 'empty: true' (most recent square behind the snake)
+    let a = document.getElementsByClassName('body')
+    if (a.length > 1) {
+      a = Array.prototype
+        .slice
+        .call(a)
+        .sort((i, j) => i.className < j.className)
+      let num = a[0].className.match(/\d+/)[0];
+      let targetGrid = gridArr.find(i => i.elementName === `grid-square-${num}`);
+      targetGrid.empty = true;
     }
   }
 }
