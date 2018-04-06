@@ -1,9 +1,8 @@
-/*jshint esversion: 6 */
 const gridContainer = document.getElementsByClassName('grid-container')[0];
 let gridArr = [];
 let maxX, maxY;
 let refreshIntervalId;
-let timeout = 100;
+let timeout = 75;
 
 // Main snake object.  Contains methods governing its behaviour.
 const head = {
@@ -179,8 +178,8 @@ const handleKeyPress = (keyPressed) => {
 const lookupGridElement = (x, y) => gridArr.find(i => i.x === x && i.y === y);
 
 const pickRandomCoords = () => {
-  const x = Math.floor(Math.random()*maxX);
-  const y = Math.floor(Math.random()*maxY);
+  const x = Math.ceil(Math.random()*maxX);
+  const y = Math.ceil(Math.random()*maxY);
   const gridElement = lookupGridElement(x, y);
 
   // ensure coords are for empty square
