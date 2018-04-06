@@ -49,7 +49,6 @@ const head = {
       currentHeadLocation.className = currentHeadLocation.className.replace('head', '');
     }
     if (document.getElementsByClassName(nextHeadLocation.elementName)[0].className.search('body') > 0 || document.getElementsByClassName(nextHeadLocation.elementName)[0].className.search('food') > 0) {
-      console.log(nextHeadLocation);
       this.handleCollision(nextHeadLocation);
     } 
     document.getElementsByClassName(nextHeadLocation.elementName)[0].classList.add(head.name);
@@ -205,7 +204,6 @@ const placeEntities = () => {
 
 const startMovingSnake = (miliseconds) => refreshIntervalId = setInterval(() => {
   head.move();
-  console.log(gridArr.filter(a => a.empty === false));
 }, miliseconds);
 
 // for starting/resetting
