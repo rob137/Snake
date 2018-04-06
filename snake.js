@@ -147,6 +147,7 @@ const checkLocationClass = (location, searchTerm) => {
   return document.getElementsByClassName(location.elementName)[0].className.search(`${searchTerm}`) > -1;
 }
 
+// creates gridArr, which is used to render grid in DOM
 const prepareGrid = (size) => {
   let elementNum = 0;
   const grid = [];
@@ -164,13 +165,14 @@ const prepareGrid = (size) => {
   return grid;
 };
 
-const createGrid = () => {
+const renderGrid = () => {
   const max = gridArr.length;
   for (let i = 0; i < max; i++) {
     gridContainer.innerHTML += `<div class="grid-square grid-square-${i}"></div>`;
   }
 };
 
+// Feeds in user direction to Head.  Head then validates/executes with its own methods.
 const handleKeyPress = (keyPressed) => {
   if (keyPressed === 'ArrowUp') {
     head.proposedDirection = 'up';
@@ -189,8 +191,7 @@ const pickRandomCoords = () => {
   const x = Math.ceil(Math.random()*maxX);
   const y = Math.ceil(Math.random()*maxY);
   const gridElement = lookupGridElement(x, y);
-
-  // ensure coords are for empty square
+  // ensure coords point to an empty square
   if (!gridElement || !gridElement.empty) {
     let {x, y} = pickRandomCoords();
   }
@@ -203,7 +204,6 @@ const setInitialCoords = (entity) => {
   entity.y = initialCoords.y;
 };
 
-const listenForInput = () => window.addEventListener('keydown', (e) => handleKeyPress(e.key));
 
 const placeEntities = () => {
   head.reassign();
@@ -218,18 +218,20 @@ const startMovingSnake = (miliseconds) => refreshIntervalId = setInterval(() => 
 const startGame = (miliseconds) => {
   head.length = 1;
   placeEntities();
-  startMovingSnake(miliseconds);
-  listenForInput();
+  startMovingSnake(miliseconds);  
 };
+
+const listenForInput = () => window.addEventListener('keydown', (e) => handleKeyPress(e.key));
 
 // preps the grid, starts initial game
 const setUp = (size, miliseconds) => {
   gridArr = prepareGrid(size);
   maxX = gridArr[gridArr.length-1].x;
   maxY = gridArr[gridArr.length-1].y;
-  createGrid();
+  renderGrid();
   setInitialCoords(head); 
   startGame(miliseconds);
+  listenForInput();
 };
 
 setUp(50, timeout);
