@@ -27,40 +27,7 @@ const head = {
       this.direction = this.proposedDirection;
     }
   },
-  // With snake body or food
-  handleCollision: function(nextHeadLocation) {
-    // For collision with food
-    if (checkLocationClass(nextHeadLocation, 'food')) {
-      food.reassign();
-      this.grow();
-      // for collision with body
-    } else {
-      // Need to reset game here
-      clearInterval(refreshIntervalId);
-      console.log('stopped!');
-    }
-  },
-  
-  // reassigns the 'head' html class
-  reassign: function() {
-    const nextHeadLocation = lookupGridElement(head.x, head.y);
-    const currentHeadLocation = document.getElementsByClassName(`head`)[0];
-    // Only false at start of game
-    if (currentHeadLocation) {
-      currentHeadLocation.className = currentHeadLocation.className.replace('head', '');
-    }
-    if (checkLocationClass(nextHeadLocation, 'body') || checkLocationClass(nextHeadLocation, 'food')) {
-      console.log(1);
-      this.handleCollision(nextHeadLocation);
-    } 
-    document.getElementsByClassName(nextHeadLocation.elementName)[0].classList.add(head.name);
-    nextHeadLocation.empty = false;
-  },
-  
-  move: function() {
-    this.setDirection();
-
-    // Adjust coords depending on direction
+  adjustCoords: function() {
     if (this.direction === 'up') {
       this.y -= 1;
     } else if (this.direction === 'down') {
@@ -70,8 +37,9 @@ const head = {
     } else if (this.direction === 'right') {
       this.x += 1;
     }
-
-    // Make snake appear on opposite side of screen when it reaches the border
+  },
+  // Make snake appear on opposite side of screen when it reaches the border
+  accountForEdgeOfScreen: function() {
     if (this.x === 0) {
       this.x = maxX;
     } else if (this.y === 0) {
@@ -81,19 +49,51 @@ const head = {
     } else if (this.y === maxY+1) {
       this.y = 1;
     }
+  },
+  // With snake body or food
+  handleCollision: function(nextHeadLocation) {
+    // For collision with food
+    if (checkLocationClass(nextHeadLocation, 'food')) {
+      food.reassign();
+      this.grow();
+      // for collision with body
+    } else {
+      resetGame();
+    }
+  },
+  // reassigns the 'head' html class
+  reassign: function() {
+    const nextHeadLocation = lookupGridElement(head.x, head.y);
+    const currentHeadLocation = document.getElementsByClassName(`head`)[0];
+    // Only false at start of game
+    if (currentHeadLocation) {
+      currentHeadLocation.className = currentHeadLocation.className.replace('head', '');
+    }
+    if (checkLocationClass(nextHeadLocation, 'body') || checkLocationClass(nextHeadLocation, 'food')) {
+      this.handleCollision(nextHeadLocation);
+    } 
+    document.getElementsByClassName(nextHeadLocation.elementName)[0].classList.add(head.name);
+    nextHeadLocation.empty = false;
+  },
+  // Allows snake tail to grow.
+  dropBreadcrumb: function() {
+    document.getElementsByClassName(lookupGridElement(head.x, head.y).elementName)[0].classList.add('1');
+  },
+  move: function() {
+    this.setDirection();
+    this.adjustCoords();
+    this.accountForEdgeOfScreen();
     this.reassign();
     this.cleanUp();
-    document.getElementsByClassName(lookupGridElement(head.x, head.y).elementName)[0].classList.add('1');
+    this.dropBreadcrumb();
   },
   grow: function() {
     this.bodyLength += 1;
   },
-
-  // Needs refactor!
   // removes body/head from squares as snake moves
   cleanUp: function() {
     // remove last snake square
-    let finalBodySquare = document.getElementsByClassName(`${head.bodyLength}`)[0];
+    const finalBodySquare = document.getElementsByClassName(`${head.bodyLength}`)[0];
     if (finalBodySquare) {                                                            
       finalBodySquare.className = finalBodySquare.className.replace(` ${head.bodyLength} body`, ``);
     }
@@ -108,9 +108,11 @@ const head = {
     // sets the trailing empty square in gridArr to 'empty: true' (most recent square behind the snake)
     let bodyArr = document.getElementsByClassName('body');
     if (bodyArr.length > 1) {
+      // Turns HTMLCollection into array 
       bodyArr = Array.prototype
         .slice
         .call(bodyArr)
+        // Order arr so that end of snake body is first item
         .sort((i, j) => i.className < j.className);
       let num = bodyArr[0].className.match(/\d+/)[0];
       let targetGrid = gridArr.find(i => i.elementName === `grid-square-${num}`);
@@ -126,11 +128,14 @@ const food = {
   reassign: function() {
     let currentFoodLocation = lookupGridElement(food.x, food.y);
     const foodElement = document.getElementsByClassName(`food`)[0];
-    // Only false at start of game
+    // Wipe food from className of current food element.  The conditional yields false only at start of game.
     if (foodElement) {
       foodElement.className = foodElement.className.replace('food', '');
     }
     // place on a random empty square
+    this.placeOnRandomEmptySquare(currentFoodLocation);
+  },
+  placeOnRandomEmptySquare: function(currentFoodLocation) {
     const newFoodCoords = pickRandomCoords();
     currentFoodLocation.empty = true;
     this.x = newFoodCoords.x;
@@ -140,7 +145,6 @@ const food = {
     document.getElementsByClassName(nextFoodLocation.elementName)[0].classList.add(food.name);
   }
 };
-
 
 // Checks if a given grid square has a class
 const checkLocationClass = (location, searchTerm) => {
@@ -213,6 +217,13 @@ const placeEntities = () => {
 const startMovingSnake = (miliseconds) => refreshIntervalId = setInterval(() => {
   head.move();
 }, miliseconds);
+
+const resetGame = () => {
+  clearInterval(refreshIntervalId);
+  gridContainer.outerHTML = '';
+  gridArr = [];
+  setUp(50, timeout);
+}
 
 // for starting/resetting
 const startGame = (miliseconds) => {
