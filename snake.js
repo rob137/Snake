@@ -1,8 +1,7 @@
 const gridContainer = document.getElementsByClassName('grid-container')[0];
 let gridArr = [];
 let maxX, maxY;
-let refreshIntervalId;
-let timeout = 50;
+const timeout = 50;
 
 // Main snake object.  Contains methods that govern snake's behaviour.
 const snake = {
@@ -159,6 +158,15 @@ const confirmLocationClass = (location, searchTerm) => {
   return location.element.className.search(`${searchTerm}`) > -1;
 }
 
+const createSnakes = (totalSnakes) => {
+  while (totalSnakes < 0) {
+
+  }
+  console.log(totalSnakes);
+  
+  return [snake]
+}
+
 // creates gridArr, which is used to render grid in DOM
 const prepareGrid = (size) => {
   let elementNum = 0;
@@ -217,7 +225,6 @@ const setInitialCoords = (entity) => {
   entity.x = initialCoords.x;
   entity.y = initialCoords.y;
 };
-
 
 const placeEntities = () => {
   snake.moveHead();
