@@ -1,12 +1,12 @@
 const gridContainer = document.getElementsByClassName('grid-container')[0];
-let gridArr = [];
+let gridState = [];
 let maxX, maxY;
-const timeout = 50;
+const timeout = 900;
 
 // Main snake object.  Contains methods that govern snake's behaviour.
 const snake = {
   name: 'snake',
-  // coords
+  // coords of head
   x: 1,
   y: 2,
   snakeLength: 20,
@@ -60,29 +60,37 @@ const snake = {
       restartGame();
     }
   },
-  // reassigns the 'head' html class
-  moveHead: function() {
-    const nextSnakeLocation = lookupGridElement(snake.x, snake.y);
-    const currentSnakeLocation = document.getElementsByClassName(`head`)[0];
-    // Only false at start of game
-    if (currentSnakeLocation) {
-      currentSnakeLocation.className = currentSnakeLocation.className.replace('head', '');
+  moveHead: function(currentPosition) {
+    // Update snake head's current location (about to be former location) in gridState and DOM
+    if (currentPosition) {
+      // update gridState
+      let currentGridItem = lookupgridStateItem(currentPosition.x, currentPosition.y);
+      currentGridItem.contains = 'body';  
+      // update DOM
+      const currentHeadLocation = document.getElementsByClassName(`head`)[0];
+      currentHeadLocation.className = currentHeadLocation.className.replace('head', '');
     }
+    
+    
+    const nextSnakeLocation = lookupgridStateItem(snake.x, snake.y);
     if (confirmLocationClass(nextSnakeLocation, 'body') || confirmLocationClass(nextSnakeLocation, 'food')) {
       this.handleCollision(nextSnakeLocation);
     } 
+    // Update next location in DOM and gridState;
     nextSnakeLocation.element.classList.add('head');
-    nextSnakeLocation.empty = false;
+    nextSnakeLocation.contains = 'head';
+    // 
   },
   // Allows snake tail to grow - places number in head square classList which will increment as snake moves.
   dropBreadcrumb: function() {
-    lookupGridElement(snake.x, snake.y).element.classList.add('1');
+    lookupgridStateItem(snake.x, snake.y).element.classList.add('1');
   },
   move: function() {
+    const currentPosition = { x: this.x, y: this.y }
     this.setDirection();
     this.adjustCoords();
     this.accountForEdgeOfScreen();
-    this.moveHead();
+    this.moveHead(currentPosition);
     this.moveBody();
     this.cleanUp();
     this.dropBreadcrumb();
@@ -104,10 +112,11 @@ const snake = {
     // Conditonal because the end of the body won't be assigned for initial frame(s) of of game
     if (finalBodySquare) {                                                          
       finalBodySquare.className = finalBodySquare.className.replace(` ${snake.snakeLength} body`, ``);
+
     } 
   },
   setTrailingSpaceToEmpty: function() {
-    // sets the trailing empty square to 'empty: true' (most recent square behind the snake)
+    // sets the trailing empty square to 'contains: "empty"'
     let bodyArr = document.getElementsByClassName('body');
     if (bodyArr.length > 1) {
       // Turns HTMLCollection into array 
@@ -117,8 +126,8 @@ const snake = {
         // Order arr so that end of snake body is first item
         .sort((i, j) => i.className < j.className);
       let num = Number(bodyArr[0].className.match(/\d+/)[0]);
-      let targetGrid = gridArr.find(i => i.elementNum === num);
-      targetGrid.empty = true;
+      let targetGrid = gridState.find(i => i.elementNum === num);
+      targetGrid.contains = 'empty';
     }
   },
   // removes body/head from squares as snake moves
@@ -133,7 +142,7 @@ const food = {
   x: 2,
   y: 3,
   reassign: function() {
-    let currentFoodLocation = lookupGridElement(food.x, food.y);
+    let currentFoodLocation = lookupgridStateItem(food.x, food.y);
     const foodElement = document.getElementsByClassName(`food`)[0];
     // Wipe food from className of current food element.  The conditional yields false only at start of game.
     if (foodElement) {
@@ -144,11 +153,11 @@ const food = {
   },
   placeOnRandomEmptySquare: function(currentFoodLocation) {
     const newFoodCoords = pickRandomCoords();
-    currentFoodLocation.empty = true;
+    currentFoodLocation.contains = 'empty';
     this.x = newFoodCoords.x;
     this.y = newFoodCoords.y;
-    const nextFoodLocation = lookupGridElement(this.x, this.y);
-    nextFoodLocation.empty = false;
+    const nextFoodLocation = lookupgridStateItem(this.x, this.y);
+    nextFoodLocation.contains = 'food';
     nextFoodLocation.element.classList.add(food.name);
   }
 };
@@ -158,35 +167,26 @@ const confirmLocationClass = (location, searchTerm) => {
   return location.element.className.search(`${searchTerm}`) > -1;
 }
 
-const createSnakes = (totalSnakes) => {
-  while (totalSnakes < 0) {
-
-  }
-  console.log(totalSnakes);
-  
-  return [snake]
-}
-
-// creates gridArr, which is used to render grid in DOM
+// creates gridState, which is used to render grid in DOM
 const prepareGrid = (size) => {
   let elementNum = 0;
-  const grid = [];
+  const gridState = [];
   for (let i = 1; i <= size; i++) {
     for (let j = 1; j <= size; j++) {
-      grid.push({
+      gridState.push({
         y: i,
         x: j, 
-        empty: true,
+        contains: 'empty',
         elementNum: elementNum
       });
       elementNum += 1;
     }
   }
-  return grid;
+  return gridState;
 };
 
 const renderGrid = () => {
-  gridArr.forEach((cell, i) => {
+  gridState.forEach((cell, i) => {
     const element = document.createElement('div');
     element.classList.add('grid-square', `grid-square-${i}`);
     gridContainer.appendChild(element);
@@ -207,14 +207,14 @@ const handleKeyPress = (keyPressed) => {
   }
 };
 
-const lookupGridElement = (x, y) => gridArr.find(i => i.x === x && i.y === y);
+const lookupgridStateItem = (x, y) => gridState.find(i => i.x === x && i.y === y);
 
 const pickRandomCoords = () => {
   const x = Math.ceil(Math.random()*maxX);
   const y = Math.ceil(Math.random()*maxY);
-  const gridElement = lookupGridElement(x, y);
+  const gridElement = lookupgridStateItem(x, y);
   // ensure coords point to an empty square
-  if (!gridElement || !gridElement.empty) {
+  if (!gridElement || !gridElement.contains === 'empty') {
     let {x, y} = pickRandomCoords();
   }
   return {x, y};
@@ -237,7 +237,7 @@ const startMovingSnake = (miliseconds) => refreshIntervalId = setInterval(() => 
 
 const restartGame = () => {
   gridContainer.innerHTML = '';
-  gridArr = [];
+  gridState = [];
   clearInterval(refreshIntervalId);
   setUp(50, timeout);
 };
@@ -253,9 +253,9 @@ const listenForInput = () => window.addEventListener('keydown', (e) => handleKey
 
 // preps the grid, starts initial game
 const setUp = (size, miliseconds) => {
-  gridArr = prepareGrid(size);
-  maxX = gridArr[gridArr.length-1].x;
-  maxY = gridArr[gridArr.length-1].y;
+  gridState = prepareGrid(size);
+  maxX = gridState[gridState.length-1].x;
+  maxY = gridState[gridState.length-1].y;
   renderGrid();
   setInitialCoords(snake); 
   startGame(miliseconds);
