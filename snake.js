@@ -5,8 +5,8 @@ let refreshIntervalId;
 let timeout = 75;
 
 // Main snake object.  Contains methods that govern snake's behaviour.
-const head = {
-  name: 'head',
+const snake = {
+  name: 'snake',
   // coords
   x: 1,
   y: 2,
@@ -51,9 +51,9 @@ const head = {
     }
   },
   // With snake body or food
-  handleCollision: function(nextHeadLocation) {
+  handleCollision: function(nextSnakeLocation) {
     // For collision with food
-    if (checkLocationClass(nextHeadLocation, 'food')) {
+    if (checkLocationClass(nextSnakeLocation, 'food')) {
       food.reassign();
       this.grow();
       // for collision with body
@@ -63,21 +63,21 @@ const head = {
   },
   // reassigns the 'head' html class
   reassign: function() {
-    const nextHeadLocation = lookupGridElement(head.x, head.y);
-    const currentHeadLocation = document.getElementsByClassName(`head`)[0];
+    const nextSnakeLocation = lookupGridElement(snake.x, snake.y);
+    const currentSnakeLocation = document.getElementsByClassName(`head`)[0];
     // Only false at start of game
-    if (currentHeadLocation) {
-      currentHeadLocation.className = currentHeadLocation.className.replace('head', '');
+    if (currentSnakeLocation) {
+      currentSnakeLocation.className = currentSnakeLocation.className.replace('head', '');
     }
-    if (checkLocationClass(nextHeadLocation, 'body') || checkLocationClass(nextHeadLocation, 'food')) {
-      this.handleCollision(nextHeadLocation);
+    if (checkLocationClass(nextSnakeLocation, 'body') || checkLocationClass(nextSnakeLocation, 'food')) {
+      this.handleCollision(nextSnakeLocation);
     } 
-    nextHeadLocation.element.classList.add(head.name);
-    nextHeadLocation.empty = false;
+    nextSnakeLocation.element.classList.add('head');
+    nextSnakeLocation.empty = false;
   },
   // Allows snake tail to grow.
   dropBreadcrumb: function() {
-    lookupGridElement(head.x, head.y).element.classList.add('1');
+    lookupGridElement(snake.x, snake.y).element.classList.add('1');
   },
   move: function() {
     this.setDirection();
@@ -93,12 +93,12 @@ const head = {
   // removes body/head from squares as snake moves
   cleanUp: function() {
     // remove last snake square
-    const finalBodySquare = document.getElementsByClassName(`${head.bodyLength}`)[0];
+    const finalBodySquare = document.getElementsByClassName(`${snake.bodyLength}`)[0];
     if (finalBodySquare) {                                                            
-      finalBodySquare.className = finalBodySquare.className.replace(` ${head.bodyLength} body`, ``);
+      finalBodySquare.className = finalBodySquare.className.replace(` ${snake.bodyLength} body`, ``);
     }
     // increment remaining body squares
-    for (var i = head.bodyLength-1; i > 0; i--) {
+    for (var i = snake.bodyLength-1; i > 0; i--) {
       let target = document.getElementsByClassName(`${i}`)[0];
       if (target) {                              // hack for now!
         target.className = target.className.replace('body', '').replace(` ${i}`, ` ${i+1} body`);
@@ -178,16 +178,16 @@ const renderGrid = () => {
   });
 };
 
-// Feeds in user direction to Head.  Head then validates/executes with its own methods.
+// Feeds in user direction to snake.  snake then validates/executes with its own methods.
 const handleKeyPress = (keyPressed) => {
   if (keyPressed === 'ArrowUp') {
-    head.proposedDirection = 'up';
+    snake.proposedDirection = 'up';
   } else if (keyPressed === "ArrowDown") {
-    head.proposedDirection = 'down';
+    snake.proposedDirection = 'down';
   } else if (keyPressed === "ArrowLeft" ) {
-    head.proposedDirection = 'left';
+    snake.proposedDirection = 'left';
   } else if (keyPressed === "ArrowRight") {
-    head.proposedDirection = 'right';
+    snake.proposedDirection = 'right';
   }
 };
 
@@ -212,12 +212,12 @@ const setInitialCoords = (entity) => {
 
 
 const placeEntities = () => {
-  head.reassign();
+  snake.reassign();
   food.reassign();
 };
 
 const startMovingSnake = (miliseconds) => refreshIntervalId = setInterval(() => {
-  head.move();
+  snake.move();
 }, miliseconds);
 
 const resetGame = () => {
@@ -229,7 +229,7 @@ const resetGame = () => {
 
 // for starting/resetting
 const startGame = (miliseconds) => {
-  head.length = 1;
+  snake.length = 1;
   placeEntities();
   startMovingSnake(miliseconds);  
 };
@@ -242,7 +242,7 @@ const setUp = (size, miliseconds) => {
   maxX = gridArr[gridArr.length-1].x;
   maxY = gridArr[gridArr.length-1].y;
   renderGrid();
-  setInitialCoords(head); 
+  setInitialCoords(snake); 
   startGame(miliseconds);
   listenForInput();
 };
