@@ -59,14 +59,14 @@ const snake = {
       restartGame();
     }
   },
-  moveHead: function(currentPosition) {
+  moveHead: function() {
+    const currentPosition = gridState.filter(i => i.contains === 'head')[0]
     // Update snake head's current location (about to be former location) in gridState and DOM
     if (currentPosition) {
       // update gridState
-      let currentGridItem = lookupGridStateItem(currentPosition.x, currentPosition.y);
-      currentGridItem.contains = 'body';  
+      currentPosition.contains = 'body';  
       // update DOM
-      currentGridItem.element.className = currentGridItem.element.className.replace('head', '');
+      currentPosition.element.className = currentPosition.element.className.replace('head', '');
     }
     
     
@@ -84,16 +84,6 @@ const snake = {
     gridState.find(i => i.x === this.x && i.y === this.y).bodySegment = 1;
     // in DOM
     lookupGridStateItem(this.x, this.y).element.classList.add('1');
-  },
-  move: function() {
-    const currentPosition = { x: this.x, y: this.y }
-    this.setDirection();
-    this.adjustCoords();
-    this.accountForEdgeOfScreen();
-    this.moveHead(currentPosition);
-    this.moveBody();
-    this.cleanUp();
-    this.setBodySegment();
   },
   grow: function() {
     this.snakeLength += 1;
@@ -114,10 +104,9 @@ const snake = {
     for (var i = this.snakeLength; i > 0; i--) {
       const target = document.getElementsByClassName(`${i}`)[0];
       const targetInState = gridState.find(grid => grid.bodySegment === i);
-      if (target) {   
+      if (target) {
         target.className = target.className.replace('body', '').replace(` ${i}`, ` ${i+1} body`);
       } 
-
       if (targetInState) {
         targetInState.bodySegment++; 
       }
@@ -156,6 +145,15 @@ const snake = {
   cleanUp: function() {
     this.removeLastBodySquare();
     this.setTrailingSpaceToEmpty();
+  },
+  move: function() {
+    this.setDirection();
+    this.adjustCoords();
+    this.accountForEdgeOfScreen();
+    this.moveHead();
+    this.moveBody();
+    this.cleanUp();
+    this.setBodySegment();
   }
 };
 
