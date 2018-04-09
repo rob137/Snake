@@ -63,15 +63,14 @@ const snake = {
     // Update snake head's current location (about to be former location) in gridState and DOM
     if (currentPosition) {
       // update gridState
-      let currentGridItem = lookupgridStateItem(currentPosition.x, currentPosition.y);
+      let currentGridItem = lookupGridStateItem(currentPosition.x, currentPosition.y);
       currentGridItem.contains = 'body';  
       // update DOM
-      const currentHeadLocation = document.getElementsByClassName(`head`)[0];
-      currentHeadLocation.className = currentHeadLocation.className.replace('head', '');
+      currentGridItem.element.className = currentGridItem.element.className.replace('head', '');
     }
     
     
-    const nextSnakeLocation = lookupgridStateItem(snake.x, snake.y);
+    const nextSnakeLocation = lookupGridStateItem(this.x, this.y);
     if (confirmLocationClass(nextSnakeLocation, 'body') || confirmLocationClass(nextSnakeLocation, 'food')) {
       this.handleCollision(nextSnakeLocation);
     } 
@@ -80,9 +79,11 @@ const snake = {
     nextSnakeLocation.contains = 'head';
     // 
   },
-  // Allows snake tail to grow - places number in head square classList which will increment as snake moves.
-  dropBodyNum: function() {
-    lookupgridStateItem(snake.x, snake.y).element.classList.add('1');
+  setBodySegment: function() {
+    // in state
+    gridState.find(i => i.x === this.x && i.y === this.y).bodySegment = 1;
+    // in DOM
+    lookupGridStateItem(this.x, this.y).element.classList.add('1');
   },
   move: function() {
     const currentPosition = { x: this.x, y: this.y }
@@ -92,45 +93,62 @@ const snake = {
     this.moveHead(currentPosition);
     this.moveBody();
     this.cleanUp();
-    this.dropBodyNum();
+    this.setBodySegment();
   },
   grow: function() {
     this.snakeLength += 1;
   },
   // increment remaining body squares
+
+        /*
   moveBody: function() {
-    for (var i = snake.snakeLength; i > 0; i--) {
-      let target = document.getElementsByClassName(`${i}`)[0];
-      if (target) {                              // hack for now!
-        target.className = target.className.replace('body', '').replace(` ${i}`, ` ${i+1} body`);
+    for (var i = this.snakeLength; i > 0; i--) {
+      let targetInState = gridState.find(grid => grid.bodySegment === i);
+      if (targetInState) {              
+        targetInState.element.className = targetInState.element.className.replace('body', '').replace(` ${i}`, ` ${i+1} body`);
       } 
     }
   },
+      */
+  moveBody: function() {
+    for (var i = this.snakeLength; i > 0; i--) {
+      const target = document.getElementsByClassName(`${i}`)[0];
+      const targetInState = gridState.find(grid => grid.bodySegment === i);
+      if (target) {   
+        target.className = target.className.replace('body', '').replace(` ${i}`, ` ${i+1} body`);
+      } 
+
+      if (targetInState) {
+        targetInState.bodySegment++; 
+      }
+    }
+  },
   removeLastBodySquare: function() {
-    const finalBodySquare = document.getElementsByClassName(`${snake.snakeLength}`)[0];
+    const finalBodySquare = document.getElementsByClassName(`${this.snakeLength}`)[0];
     // Conditonal because the end of the body won't be assigned for initial frame(s) of of game
     if (finalBodySquare) {                                                          
-      finalBodySquare.className = finalBodySquare.className.replace(` ${snake.snakeLength} body`, ``);
+      finalBodySquare.className = finalBodySquare.className.replace(` ${this.snakeLength} body`, ``);
     } 
   },
-  findBodyNum: function(element) {
+  findBodySegment: function(element) {
     return Number(element.className.match(/ [0-9]+ /)[0]);
   },
   setTrailingSpaceToEmpty: function() {
     let bodyArr = document.getElementsByClassName('body');
     if (bodyArr.length > 1) {
-      // Turns HTMLCollection into array so it can be sorted by bodyNum number
+      // Turns HTMLCollection into array so it can be sorted by bodySegment number
       bodyArr = Array.from(bodyArr);
       // Order arr of body elements so that the first item is the last square of the snake's body
       bodyArr = bodyArr.sort((i, j) => {
-        if (this.findBodyNum(i) < this.findBodyNum(j)) {
+        if (this.findBodySegment(i) < this.findBodySegment(j)) {
           return 1;
         } 
         return -1;
       });
       let num = Number(bodyArr[0].className.match(/\d+/)[0]);
       let targetGrid = gridState.find(i => i.elementNum === num);
-      // sets the trailing empty square to 'contains: "empty"'
+      // Mark the grid as empty in state
+      targetGrid.bodySegment = null;
       targetGrid.contains = 'empty';
     }
   },
@@ -146,10 +164,12 @@ const food = {
   x: 2,
   y: 3,
   reassign: function() {
-    let currentFoodLocation = lookupgridStateItem(food.x, food.y);
-    const foodElement = document.getElementsByClassName(`food`)[0];
+    let currentFoodLocation = lookupGridStateItem(food.x, food.y);
+    
+    const foodGrid = gridState.find(i => i.contains === 'food');
     // Wipe food from className of current food element.  The conditional yields false only at start of game.
-    if (foodElement) {
+    if (foodGrid) {
+      const foodElement = document.getElementsByClassName(`food`)[0];
       foodElement.className = foodElement.className.replace('food', '');
     }
     // place on a random empty square
@@ -160,7 +180,7 @@ const food = {
     currentFoodLocation.contains = 'empty';
     this.x = newFoodCoords.x;
     this.y = newFoodCoords.y;
-    const nextFoodLocation = lookupgridStateItem(this.x, this.y);
+    const nextFoodLocation = lookupGridStateItem(this.x, this.y);
     nextFoodLocation.contains = 'food';
     nextFoodLocation.element.classList.add(food.name);
   }
@@ -181,6 +201,7 @@ const prepareGrid = (size) => {
         y: i,
         x: j, 
         contains: 'empty',
+        bodySegment: null,
         elementNum: elementNum
       });
       elementNum += 1;
@@ -212,12 +233,12 @@ const handleKeyPress = (keyPressed) => {
   }
 };
 
-const lookupgridStateItem = (x, y) => gridState.find(i => i.x === x && i.y === y);
+const lookupGridStateItem = (x, y) => gridState.find(i => i.x === x && i.y === y);
 
 const pickRandomCoords = () => {
   const x = Math.ceil(Math.random()*maxX);
   const y = Math.ceil(Math.random()*maxY);
-  const gridElement = lookupgridStateItem(x, y);
+  const gridElement = lookupGridStateItem(x, y);
   // ensure coords point to an empty square
   if (!gridElement || !gridElement.contains === 'empty') {
     let {x, y} = pickRandomCoords();
