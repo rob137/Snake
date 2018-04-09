@@ -72,12 +72,12 @@ const head = {
     if (checkLocationClass(nextHeadLocation, 'body') || checkLocationClass(nextHeadLocation, 'food')) {
       this.handleCollision(nextHeadLocation);
     } 
-    document.getElementsByClassName(nextHeadLocation.elementName)[0].classList.add(head.name);
+    nextHeadLocation.element.classList.add(head.name);
     nextHeadLocation.empty = false;
   },
   // Allows snake tail to grow.
   dropBreadcrumb: function() {
-    document.getElementsByClassName(lookupGridElement(head.x, head.y).elementName)[0].classList.add('1');
+    lookupGridElement(head.x, head.y).element.classList.add('1');
   },
   move: function() {
     this.setDirection();
@@ -115,7 +115,7 @@ const head = {
         // Order arr so that end of snake body is first item
         .sort((i, j) => i.className < j.className);
       let num = bodyArr[0].className.match(/\d+/)[0];
-      let targetGrid = gridArr.find(i => i.elementName === `grid-square-${num}`);
+      let targetGrid = gridArr.find(i => i.elementNum === num);
       targetGrid.empty = true;
     }
   }
@@ -142,13 +142,13 @@ const food = {
     this.y = newFoodCoords.y;
     const nextFoodLocation = lookupGridElement(this.x, this.y);
     nextFoodLocation.empty = false;
-    document.getElementsByClassName(nextFoodLocation.elementName)[0].classList.add(food.name);
+    nextFoodLocation.element.classList.add(food.name);
   }
 };
 
 // Checks if a given grid square has a class
 const checkLocationClass = (location, searchTerm) => {
-  return document.getElementsByClassName(location.elementName)[0].className.search(`${searchTerm}`) > -1;
+  return location.element.className.search(`${searchTerm}`) > -1;
 }
 
 // creates gridArr, which is used to render grid in DOM
@@ -161,7 +161,7 @@ const prepareGrid = (size) => {
         y: i,
         x: j, 
         empty: true,
-        elementName: `grid-square-${elementNum}`
+        elementNum: elementNum
       });
       elementNum += 1;
     }
@@ -170,10 +170,12 @@ const prepareGrid = (size) => {
 };
 
 const renderGrid = () => {
-  const max = gridArr.length;
-  for (let i = 0; i < max; i++) {
-    gridContainer.innerHTML += `<div class="grid-square grid-square-${i}"></div>`;
-  }
+  gridArr.forEach((cell, i) => {
+    const element = document.createElement('div');
+    element.classList.add('grid-square', `grid-square-${i}`);
+    gridContainer.appendChild(element);
+    cell.element = element;
+  });
 };
 
 // Feeds in user direction to Head.  Head then validates/executes with its own methods.
@@ -223,7 +225,7 @@ const resetGame = () => {
   gridContainer.outerHTML = '';
   gridArr = [];
   setUp(50, timeout);
-}
+};
 
 // for starting/resetting
 const startGame = (miliseconds) => {
