@@ -229,9 +229,9 @@ const startMovingSnake = (miliseconds) => refreshIntervalId = setInterval(() => 
 }, miliseconds);
 
 const restartGame = () => {
-  clearInterval(refreshIntervalId);
-  gridContainer.outerHTML = '';
+  gridContainer.innerHTML = '';
   gridArr = [];
+  clearInterval(refreshIntervalId);
   setUp(50, timeout);
 };
 
