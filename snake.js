@@ -75,7 +75,7 @@ const snake = {
     nextSnakeLocation.element.classList.add('head');
     nextSnakeLocation.empty = false;
   },
-  // Allows snake tail to grow - places number in className which will increment as snake moves.
+  // Allows snake tail to grow - places number in head square classList which will increment as snake moves.
   dropBreadcrumb: function() {
     lookupGridElement(snake.x, snake.y).element.classList.add('1');
   },
@@ -100,14 +100,14 @@ const snake = {
       } 
     }
   },
-  // removes body/head from squares as snake moves
-  cleanUp: function() {
-    // remove trailing body square
+  removeLastBodySquare: function() {
     const finalBodySquare = document.getElementsByClassName(`${snake.snakeLength}`)[0];
     // Conditonal because the end of the body won't be assigned for initial frame(s) of of game
     if (finalBodySquare) {                                                            
       finalBodySquare.className = finalBodySquare.className.replace(` ${snake.snakeLength} body`, ``);
     } 
+  },
+  setTrailingSpaceToEmpty: function() {
     // sets the trailing empty square to 'empty: true' (most recent square behind the snake)
     let bodyArr = document.getElementsByClassName('body');
     if (bodyArr.length > 1) {
@@ -118,10 +118,14 @@ const snake = {
         // Order arr so that end of snake body is first item
         .sort((i, j) => i.className < j.className);
       let num = Number(bodyArr[0].className.match(/\d+/)[0]);
-      
       let targetGrid = gridArr.find(i => i.elementNum === num);
       targetGrid.empty = true;
     }
+  },
+  // removes body/head from squares as snake moves
+  cleanUp: function() {
+    this.removeLastBodySquare();
+    this.setTrailingSpaceToEmpty();
   }
 };
 
