@@ -1,4 +1,3 @@
-const gridContainer = document.getElementsByClassName('grid-container')[0];
 let gridState = [];
 let maxX, maxY;
 const timeout = 100;
@@ -193,6 +192,7 @@ const prepareGrid = (size) => {
 const renderGrid = () => {
   gridState.forEach((cell, i) => {
     const element = document.createElement('div');
+    const gridContainer = document.getElementsByClassName('grid-container')[0];
     element.classList.add('grid-square', `grid-square-${i}`);
     gridContainer.appendChild(element);
     cell.element = element;
@@ -241,6 +241,7 @@ const startMovingSnake = (miliseconds) => refreshIntervalId = setInterval(() => 
 }, miliseconds);
 
 const restartGame = () => {
+  const gridContainer = document.getElementsByClassName('grid-container')[0];
   gridContainer.innerHTML = '';
   gridState = [];
   clearInterval(refreshIntervalId);
