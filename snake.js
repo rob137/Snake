@@ -1,7 +1,7 @@
 const gridContainer = document.getElementsByClassName('grid-container')[0];
 let gridState = [];
 let maxX, maxY;
-const timeout = 900;
+const timeout = 100;
 
 // Main snake object.  Contains methods that govern snake's behaviour.
 const snake = {
@@ -82,7 +82,7 @@ const snake = {
     // 
   },
   // Allows snake tail to grow - places number in head square classList which will increment as snake moves.
-  dropBreadcrumb: function() {
+  dropBodyNum: function() {
     lookupgridStateItem(snake.x, snake.y).element.classList.add('1');
   },
   move: function() {
@@ -93,7 +93,7 @@ const snake = {
     this.moveHead(currentPosition);
     this.moveBody();
     this.cleanUp();
-    this.dropBreadcrumb();
+    this.dropBodyNum();
   },
   grow: function() {
     this.snakeLength += 1;
@@ -112,21 +112,26 @@ const snake = {
     // Conditonal because the end of the body won't be assigned for initial frame(s) of of game
     if (finalBodySquare) {                                                          
       finalBodySquare.className = finalBodySquare.className.replace(` ${snake.snakeLength} body`, ``);
-
     } 
   },
+  findBodyNum: function(element) {
+    return Number(element.className.match(/ [0-9]+ /)[0]);
+  },
   setTrailingSpaceToEmpty: function() {
-    // sets the trailing empty square to 'contains: "empty"'
     let bodyArr = document.getElementsByClassName('body');
     if (bodyArr.length > 1) {
-      // Turns HTMLCollection into array 
-      bodyArr = Array.prototype
-        .slice
-        .call(bodyArr)
-        // Order arr so that end of snake body is first item
-        .sort((i, j) => i.className < j.className);
+      // Turns HTMLCollection into array so it can be sorted by bodyNum number
+      bodyArr = Array.from(bodyArr);
+      // Order arr of body elements so that the first item is the last square of the snake's body
+      bodyArr = bodyArr.sort((i, j) => {
+        if (this.findBodyNum(i) < this.findBodyNum(j)) {
+          return 1;
+        } 
+        return -1;
+      });
       let num = Number(bodyArr[0].className.match(/\d+/)[0]);
       let targetGrid = gridState.find(i => i.elementNum === num);
+      // sets the trailing empty square to 'contains: "empty"'
       targetGrid.contains = 'empty';
     }
   },
