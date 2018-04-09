@@ -63,12 +63,11 @@ const snake = {
     const currentPosition = gridState.filter(i => i.contains === 'head')[0]
     // Update snake head's current location (about to be former location) in gridState and DOM
     if (currentPosition) {
-      // update gridState
+      // update state
       currentPosition.contains = 'body';  
       // update DOM
       currentPosition.element.className = currentPosition.element.className.replace('head', '');
     }
-    
     
     const nextSnakeLocation = lookupGridStateItem(this.x, this.y);
     if (confirmLocationClass(nextSnakeLocation, 'body') || confirmLocationClass(nextSnakeLocation, 'food')) {
@@ -89,17 +88,6 @@ const snake = {
     this.snakeLength += 1;
   },
   // increment remaining body squares
-
-        /*
-  moveBody: function() {
-    for (var i = this.snakeLength; i > 0; i--) {
-      let targetInState = gridState.find(grid => grid.bodySegment === i);
-      if (targetInState) {              
-        targetInState.element.className = targetInState.element.className.replace('body', '').replace(` ${i}`, ` ${i+1} body`);
-      } 
-    }
-  },
-      */
   moveBody: function() {
     for (var i = this.snakeLength; i > 0; i--) {
       const target = document.getElementsByClassName(`${i}`)[0];
@@ -231,7 +219,7 @@ const handleKeyPress = (keyPressed) => {
   }
 };
 
-const lookupGridStateItem = (x, y) => gridState.find(i => i.x === x && i.y === y);
+const lookupGridStateItem = (x, y) => gridState.find(grid => grid.x === x && grid.y === y);
 
 const pickRandomCoords = () => {
   const x = Math.ceil(Math.random()*maxX);
