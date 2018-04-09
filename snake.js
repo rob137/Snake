@@ -2,7 +2,7 @@ const gridContainer = document.getElementsByClassName('grid-container')[0];
 let gridArr = [];
 let maxX, maxY;
 let refreshIntervalId;
-let timeout = 75;
+let timeout = 200;
 
 // Main snake object.  Contains methods that govern snake's behaviour.
 const snake = {
@@ -10,7 +10,7 @@ const snake = {
   // coords
   x: 1,
   y: 2,
-  bodyLength: 20,
+  snakeLength: 5,
   direction: "left",
   proposedDirection: "left",
   // Validates user input
@@ -53,7 +53,7 @@ const snake = {
   // With snake body or food
   handleCollision: function(nextSnakeLocation) {
     // For collision with food
-    if (checkLocationClass(nextSnakeLocation, 'food')) {
+    if (confirmLocationClass(nextSnakeLocation, 'food')) {
       food.reassign();
       this.grow();
       // for collision with body
@@ -62,20 +62,20 @@ const snake = {
     }
   },
   // reassigns the 'head' html class
-  reassign: function() {
+  moveHead: function() {
     const nextSnakeLocation = lookupGridElement(snake.x, snake.y);
     const currentSnakeLocation = document.getElementsByClassName(`head`)[0];
     // Only false at start of game
     if (currentSnakeLocation) {
       currentSnakeLocation.className = currentSnakeLocation.className.replace('head', '');
     }
-    if (checkLocationClass(nextSnakeLocation, 'body') || checkLocationClass(nextSnakeLocation, 'food')) {
+    if (confirmLocationClass(nextSnakeLocation, 'body') || confirmLocationClass(nextSnakeLocation, 'food')) {
       this.handleCollision(nextSnakeLocation);
     } 
     nextSnakeLocation.element.classList.add('head');
     nextSnakeLocation.empty = false;
   },
-  // Allows snake tail to grow.
+  // Allows snake tail to grow - places number in className which will increment as snake moves.
   dropBreadcrumb: function() {
     lookupGridElement(snake.x, snake.y).element.classList.add('1');
   },
@@ -83,29 +83,32 @@ const snake = {
     this.setDirection();
     this.adjustCoords();
     this.accountForEdgeOfScreen();
-    this.reassign();
+    this.moveHead();
+    this.moveBody();
     this.cleanUp();
     this.dropBreadcrumb();
   },
   grow: function() {
-    this.bodyLength += 1;
+    this.snakeLength += 1;
   },
-  // removes body/head from squares as snake moves
-  cleanUp: function() {
-    // remove last snake square
-    const finalBodySquare = document.getElementsByClassName(`${snake.bodyLength}`)[0];
-    if (finalBodySquare) {                                                            
-      finalBodySquare.className = finalBodySquare.className.replace(` ${snake.bodyLength} body`, ``);
-    }
-    // increment remaining body squares
-    for (var i = snake.bodyLength-1; i > 0; i--) {
+  // increment remaining body squares
+  moveBody: function() {
+    for (var i = snake.snakeLength; i > 0; i--) {
       let target = document.getElementsByClassName(`${i}`)[0];
       if (target) {                              // hack for now!
         target.className = target.className.replace('body', '').replace(` ${i}`, ` ${i+1} body`);
       } 
     }
-
-    // sets the trailing empty square in gridArr to 'empty: true' (most recent square behind the snake)
+  },
+  // removes body/head from squares as snake moves
+  cleanUp: function() {
+    // remove trailing body square
+    const finalBodySquare = document.getElementsByClassName(`${snake.snakeLength}`)[0];
+    // Conditonal because the end of the body won't be assigned for initial frame(s) of of game
+    if (finalBodySquare) {                                                            
+      finalBodySquare.className = finalBodySquare.className.replace(` ${snake.snakeLength} body`, ``);
+    } 
+    // sets the trailing empty square to 'empty: true' (most recent square behind the snake)
     let bodyArr = document.getElementsByClassName('body');
     if (bodyArr.length > 1) {
       // Turns HTMLCollection into array 
@@ -114,7 +117,8 @@ const snake = {
         .call(bodyArr)
         // Order arr so that end of snake body is first item
         .sort((i, j) => i.className < j.className);
-      let num = bodyArr[0].className.match(/\d+/)[0];
+      let num = Number(bodyArr[0].className.match(/\d+/)[0]);
+      
       let targetGrid = gridArr.find(i => i.elementNum === num);
       targetGrid.empty = true;
     }
@@ -147,7 +151,7 @@ const food = {
 };
 
 // Checks if a given grid square has a class
-const checkLocationClass = (location, searchTerm) => {
+const confirmLocationClass = (location, searchTerm) => {
   return location.element.className.search(`${searchTerm}`) > -1;
 }
 
@@ -212,7 +216,7 @@ const setInitialCoords = (entity) => {
 
 
 const placeEntities = () => {
-  snake.reassign();
+  snake.moveHead();
   food.reassign();
 };
 
