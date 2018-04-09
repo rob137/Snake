@@ -2,7 +2,7 @@ const gridContainer = document.getElementsByClassName('grid-container')[0];
 let gridArr = [];
 let maxX, maxY;
 let refreshIntervalId;
-let timeout = 200;
+let timeout = 50;
 
 // Main snake object.  Contains methods that govern snake's behaviour.
 const snake = {
@@ -10,7 +10,7 @@ const snake = {
   // coords
   x: 1,
   y: 2,
-  snakeLength: 5,
+  snakeLength: 20,
   direction: "left",
   proposedDirection: "left",
   // Validates user input
@@ -58,7 +58,7 @@ const snake = {
       this.grow();
       // for collision with body
     } else {
-      resetGame();
+      restartGame();
     }
   },
   // reassigns the 'head' html class
@@ -103,7 +103,7 @@ const snake = {
   removeLastBodySquare: function() {
     const finalBodySquare = document.getElementsByClassName(`${snake.snakeLength}`)[0];
     // Conditonal because the end of the body won't be assigned for initial frame(s) of of game
-    if (finalBodySquare) {                                                            
+    if (finalBodySquare) {                                                          
       finalBodySquare.className = finalBodySquare.className.replace(` ${snake.snakeLength} body`, ``);
     } 
   },
@@ -228,14 +228,14 @@ const startMovingSnake = (miliseconds) => refreshIntervalId = setInterval(() => 
   snake.move();
 }, miliseconds);
 
-const resetGame = () => {
+const restartGame = () => {
   clearInterval(refreshIntervalId);
   gridContainer.outerHTML = '';
   gridArr = [];
   setUp(50, timeout);
 };
 
-// for starting/resetting
+// for starting/restarting
 const startGame = (miliseconds) => {
   snake.length = 1;
   placeEntities();
