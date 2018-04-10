@@ -8,7 +8,7 @@ const snake = {
   // coords of head
   x: 1,
   y: 2,
-  snakeLength: 20,
+  snakeLength: 5,
   direction: "left",
   proposedDirection: "left",
   // Validates user input
@@ -89,7 +89,7 @@ const snake = {
   },
   // increment remaining body squares
   moveBody: function() {
-    for (var i = this.snakeLength; i > 0; i--) {
+    for (let i = this.snakeLength; i > 0; i--) {
       const target = document.getElementsByClassName(`${i}`)[0];
       const targetInState = gridState.find(grid => grid.bodySegment === i);
       if (target) {
@@ -101,32 +101,36 @@ const snake = {
     }
   },
   removeLastBodySquare: function() {
-    const finalBodySquare = document.getElementsByClassName(`${this.snakeLength}`)[0];
+    //const finalBodySegment = gridState.find(i => i.bodySegment === this.snakeLength+1);
+    let finalBodySquare = document.getElementsByClassName(`${snake.snakeLength+1}`)[0];
     // Conditonal because the end of the body won't be assigned for initial frame(s) of of game
-    if (finalBodySquare) {                                                          
-      finalBodySquare.className = finalBodySquare.className.replace(` ${this.snakeLength} body`, ``);
+    if (finalBodySquare) {
+      finalBodySquare.className = finalBodySquare.className.replace(` ${this.snakeLength+1} body`, ``)
+      //finalBodySegment.element.className = finalBodySegment.element.className.replace(` ${this.snakeLength+1} body`, ``);
     } 
   },
   findBodySegment: function(element) {
     return Number(element.className.match(/ [0-9]+ /)[0]);
   },
   setTrailingSpaceToEmpty: function() {
-    let bodyArr = document.getElementsByClassName('body');
-    if (bodyArr.length > 1) {
-      // Turns HTMLCollection into array so it can be sorted by bodySegment number
-      bodyArr = Array.from(bodyArr);
-      // Order arr of body elements so that the first item is the last square of the snake's body
-      bodyArr = bodyArr.sort((i, j) => {
+    // Make arr of body elements
+    let bodyGridsArr = gridState.filter(i => i.contains === 'body').map(i => i.element);
+    bodyGridsArr = Array.from(bodyGridsArr);
+    if (bodyGridsArr.length > 0) {
+      // Sort arr to have end of snake first
+      bodyGridsArr = bodyGridsArr.sort((i, j) => {
         if (this.findBodySegment(i) < this.findBodySegment(j)) {
           return 1;
         } 
         return -1;
       });
-      let num = Number(bodyArr[0].className.match(/\d+/)[0]);
-      let targetGrid = gridState.find(i => i.elementNum === num);
-      // Mark the grid as empty in state
-      targetGrid.bodySegment = null;
-      targetGrid.contains = 'empty';
+      
+      // Find end of snake in state and update
+      let rearOfSnakeGridNum = Number(bodyGridsArr[0].className.match(/\d+/)[0]);
+      let gridToUpdate = gridState.find(i => i.elementNum === rearOfSnakeGridNum);
+      gridToUpdate.bodySegment = null;
+      gridToUpdate.contains = 'empty';
+      gridToUpdate.element.className.replace('body', '');  // Possibly need to also remove bodySegmest from element class
     }
   },
   // removes body/head from squares as snake moves
