@@ -4,7 +4,7 @@ interface GridStateItem {
   contains: string,
   bodySegment: number,
   elementNum: number,
-  element?: HTMLElement
+  element?: HTMLElement;
 }
 
 interface Snake {
@@ -36,7 +36,7 @@ interface Food {
 let gridState: GridStateItem[] = [];
 let maxX: number, maxY: number;
 let refreshIntervalId: number;
-const timeout: number = 100;
+const timeout: number = 60;
 
 // Main snake object.  Contains methods that govern snake's behaviour.
 const snake = {
@@ -96,28 +96,47 @@ const snake = {
     }
   },
   moveHead: function() {
-    const currentPosition = gridState.filter(i => i.contains === 'head')[0]
+    const currentPosition: GridStateItem = gridState.filter(i => i.contains === 'head')[0]
     // Update snake head's current location (about to be former location) in gridState and DOM
+    
     if (currentPosition) {
       // update state
       currentPosition.contains = 'body';  
       // update DOM
+      if (!currentPosition.element) {
+        throw new Error('No element found');
+      }
       currentPosition.element.className = currentPosition.element.className.replace('head', '');
     }
     
-    const nextSnakeLocation = lookupGridStateItem(this.x, this.y);
+    const nextSnakeLocation: GridStateItem | undefined = lookupGridStateItem(this.x, this.y);
+    if (!nextSnakeLocation) {
+      throw new Error('No location found');
+    }
     if (confirmLocationClass(nextSnakeLocation, 'body') || confirmLocationClass(nextSnakeLocation, 'food')) {
       this.handleCollision(nextSnakeLocation);
     } 
+    
+    if (!nextSnakeLocation.element) {
+      throw new Error('No element found');
+    }
     // Update next location in DOM and gridState;
     nextSnakeLocation.element.classList.add('head');
     nextSnakeLocation.contains = 'head';
   },
   setBodySegment: function() {
     // in state
-    gridState.find(i => i.x === this.x && i.y === this.y).bodySegment = 1;
+    let targetInState = lookupGridStateItem(this.x, this.y);
+    if (!targetInState) {
+      throw new Error('No Location Found');
+    }
+    targetInState.bodySegment = 1;
+
+    if (!targetInState.element) {
+      throw new Error('No element found');
+    }
     // in DOM
-    lookupGridStateItem(this.x, this.y).element.classList.add('1');
+    targetInState.element.classList.add('1');
   },
   grow: function() {
     this.snakeLength += 1;
@@ -130,6 +149,10 @@ const snake = {
         // update state
         targetInState.bodySegment += 1; 
         targetInState.contains = 'body';
+        
+        if (!targetInState.element) {
+          throw new Error('No element found');
+        }
         // update DOM
         targetInState.element.className = targetInState.element.className
           .replace('body', '') // prevents duplicate body classes in html element
@@ -142,6 +165,9 @@ const snake = {
     const finalBodySegment = gridState.find(i => i.bodySegment === this.snakeLength+1);
     // Conditonal because the end of the body won't be assigned for initial frame(s) of of game
     if (finalBodySegment) {
+      if (!finalBodySegment.element) {
+        throw new Error('No element found');
+      }
       finalBodySegment.element.className = finalBodySegment.element.className
         .replace(` ${this.snakeLength+1} body`, ``);
       finalBodySegment.contains = 'empty';
@@ -169,6 +195,9 @@ const food = {
     const foodGrid = gridState.find(i => i.contains === 'food');
     // Wipe food from className of current food element.  The conditional yields false only at start of game.
     if (foodGrid) {
+      if (!foodGrid.element) {
+        throw new Error('No element found');
+      }
       foodGrid.element.className = foodGrid.element.className.replace('food', '');
     }
     // place on a random empty square
@@ -180,13 +209,22 @@ const food = {
     this.x = newFoodCoords.x;
     this.y = newFoodCoords.y;
     const nextFoodLocation = lookupGridStateItem(this.x, this.y);
+    if (!nextFoodLocation) {
+      throw new Error('No Location Found');
+    }
     nextFoodLocation.contains = 'food';
+    if (!nextFoodLocation.element) {
+      throw new Error('No element found');
+    }
     nextFoodLocation.element.classList.add(food.name);
   }
 };
 
 // Checks if a given grid square has a class
 const confirmLocationClass = (location: GridStateItem, searchTerm: string) => {
+  if (!location.element) {
+    throw new Error('No element found');
+  }
   return location.element.className.search(`${searchTerm}`) > -1;
 }
 
@@ -201,7 +239,7 @@ const prepareGrid = (size: number) => {
         x: j, 
         contains: 'empty',
         bodySegment: 0,
-        elementNum: elementNum
+        elementNum: elementNum,
       });
       elementNum += 1;
     }
