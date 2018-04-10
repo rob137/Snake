@@ -120,11 +120,8 @@ var snake = {
             finalBodySegment.element.className = finalBodySegment.element.className
                 .replace(" " + (this.snakeLength + 1) + " body", "");
             finalBodySegment.contains = 'empty';
-            finalBodySegment.bodySegment = null;
+            finalBodySegment.bodySegment = 0;
         }
-    },
-    findBodySegment: function (element) {
-        return Number(element.className.match(/ [0-9]+ /)[0]);
     },
     move: function () {
         this.setDirection();
@@ -174,7 +171,7 @@ var prepareGrid = function (size) {
                 y: i,
                 x: j,
                 contains: 'empty',
-                bodySegment: null,
+                bodySegment: 0,
                 elementNum: elementNum
             });
             elementNum += 1;
@@ -183,12 +180,12 @@ var prepareGrid = function (size) {
     return output;
 };
 var renderGrid = function () {
-    gridState.forEach(function (cell, i) {
+    gridState.forEach(function (gridSquare, i) {
         var element = document.createElement('div');
         var gridContainer = document.getElementsByClassName('grid-container')[0];
         element.classList.add('grid-square', "grid-square-" + i);
         gridContainer.appendChild(element);
-        cell.element = element;
+        gridSquare.element = element;
     });
 };
 // Feeds in user direction to snake.  snake then validates/executes with its own methods.

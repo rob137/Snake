@@ -1,7 +1,42 @@
-let gridState = [];
-let maxX, maxY;
-let refreshIntervalId;
-const timeout = 100;
+interface GridStateItem {
+  y: number,
+  x: number, 
+  contains: string,
+  bodySegment: number,
+  elementNum: number,
+  element?: HTMLElement
+}
+
+interface Snake {
+  name: string,
+  x: number,
+  y: number,
+  snakeLength: number,
+  direction: string,
+  proposedDirection: string,
+  checkDirectionShouldChange(): void,
+  setDirection(): void,
+  adjustCoords(): void,
+  accountForEdgeOfScreen(): void,
+  handleCollision(nextSnakeLocation: GridStateItem): void,
+  moveHead(): void,
+  setBodySegment(): void,
+  grow(): void,
+  moveBody(): void,
+  cleanUp(): void,
+  move(): void,
+}
+interface Food {
+  name: string,
+  x: number,
+  y: number,
+  reassign(): void,
+  placeOnRandomEmptySquare(): void
+}
+let gridState: GridStateItem[] = [];
+let maxX: number, maxY: number;
+let refreshIntervalId: number;
+const timeout: number = 100;
 
 // Main snake object.  Contains methods that govern snake's behaviour.
 const snake = {
@@ -110,13 +145,9 @@ const snake = {
       finalBodySegment.element.className = finalBodySegment.element.className
         .replace(` ${this.snakeLength+1} body`, ``);
       finalBodySegment.contains = 'empty';
-      finalBodySegment.bodySegment = null;
+      finalBodySegment.bodySegment = 0;
    } 
   },
-  findBodySegment: function(element) {
-    return Number(element.className.match(/ [0-9]+ /)[0]);
-  },
-
   move: function() {
     this.setDirection();
     this.adjustCoords();
@@ -160,16 +191,16 @@ const confirmLocationClass = (location, searchTerm) => {
 }
 
 // creates gridState, which is used to render grid in DOM
-const prepareGrid = (size) => {
+const prepareGrid = (size: number) => {
   let elementNum = 0;
-  const output = [];
+  const output: GridStateItem[] = [];
   for (let i = 1; i <= size; i++) {
     for (let j = 1; j <= size; j++) {
       output.push({
         y: i,
         x: j, 
         contains: 'empty',
-        bodySegment: null,
+        bodySegment: 0,
         elementNum: elementNum
       });
       elementNum += 1;
@@ -179,12 +210,12 @@ const prepareGrid = (size) => {
 };
 
 const renderGrid = () => {
-  gridState.forEach((cell, i) => {
+  gridState.forEach((gridSquare, i) => {
     const element = document.createElement('div');
     const gridContainer = document.getElementsByClassName('grid-container')[0];
     element.classList.add('grid-square', `grid-square-${i}`);
     gridContainer.appendChild(element);
-    cell.element = element;
+    gridSquare.element = element;
   });
 };
 
@@ -225,7 +256,7 @@ const placeEntities = () => {
   food.reassign();
 };
 
-const startMovingSnake = (miliseconds) => refreshIntervalId = setInterval(() => {
+const startMovingSnake = (miliseconds: number) => refreshIntervalId = setInterval(() => {
   snake.move();
 }, miliseconds);
 
@@ -238,7 +269,7 @@ const restartGame = () => {
 };
 
 // for starting/restarting
-const startGame = (miliseconds) => {
+const startGame = (miliseconds: number) => {
   snake.snakeLength = 10;
   placeEntities();
   startMovingSnake(miliseconds);  
@@ -247,7 +278,7 @@ const startGame = (miliseconds) => {
 const listenForInput = () => window.addEventListener('keydown', (e) => handleKeyPress(e.key));
 
 // preps the grid, starts initial game
-const setUp = (size, miliseconds) => {
+const setUp = (size: number, miliseconds: number) => {
   gridState = prepareGrid(size);
   maxX = gridState[gridState.length-1].x;
   maxY = gridState[gridState.length-1].y;
