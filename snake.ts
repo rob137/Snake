@@ -85,7 +85,7 @@ const snake = {
     }
   },
   // With snake body or food
-  handleCollision: function(nextSnakeLocation) {
+  handleCollision: function(nextSnakeLocation: GridStateItem) {
     // For collision with food
     if (confirmLocationClass(nextSnakeLocation, 'food')) {
       food.reassign();
@@ -174,7 +174,7 @@ const food = {
     // place on a random empty square
     this.placeOnRandomEmptySquare(currentFoodLocation);
   },
-  placeOnRandomEmptySquare: function(currentFoodLocation) {
+  placeOnRandomEmptySquare: function(currentFoodLocation: GridStateItem) {
     const newFoodCoords = pickRandomCoords();
     currentFoodLocation.contains = 'empty';
     this.x = newFoodCoords.x;
@@ -186,7 +186,7 @@ const food = {
 };
 
 // Checks if a given grid square has a class
-const confirmLocationClass = (location, searchTerm) => {
+const confirmLocationClass = (location: GridStateItem, searchTerm: string) => {
   return location.element.className.search(`${searchTerm}`) > -1;
 }
 
@@ -220,7 +220,7 @@ const renderGrid = () => {
 };
 
 // Feeds in user direction to snake.  snake then validates/executes with its own methods.
-const handleKeyPress = (keyPressed) => {
+const handleKeyPress = (keyPressed: string) => {
   if (keyPressed === 'ArrowUp') {
     snake.proposedDirection = 'up';
   } else if (keyPressed === "ArrowDown") {
@@ -232,7 +232,7 @@ const handleKeyPress = (keyPressed) => {
   }
 };
 
-const lookupGridStateItem = (x, y) => gridState.find(grid => grid.x === x && grid.y === y);
+const lookupGridStateItem = (x: number, y: number) => gridState.find(grid => grid.x === x && grid.y === y);
 
 const pickRandomCoords = () => {
   const x = Math.ceil(Math.random()*maxX);
@@ -245,7 +245,7 @@ const pickRandomCoords = () => {
   return {x, y};
 };
 
-const setInitialCoords = (entity) => {
+const setInitialCoords = (entity: Snake | Food) => {
   let initialCoords = pickRandomCoords();
   entity.x = initialCoords.x;
   entity.y = initialCoords.y;
