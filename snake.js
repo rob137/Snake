@@ -91,55 +91,31 @@ const snake = {
     for (let i = this.snakeLength; i > 0; i--) {
       const targetInState = gridState.find(gridSquare => gridSquare.bodySegment === i);
       if (targetInState) {
+        // update state
         targetInState.bodySegment += 1; 
         targetInState.contains = 'body';
+        // update DOM
         targetInState.element.className = targetInState.element.className
-          .replace('body', '')
+          .replace('body', '') // prevents duplicate body classes in html element
           .replace(` ${targetInState.bodySegment-1}`, ` ${targetInState.bodySegment} body`);
       }
     }
   },
-  removeLastBodySquare: function() {
+  // remove trailing body block - eg if snakeLength is 11, then remove square 12
+  cleanUp: function() {
     const finalBodySegment = gridState.find(i => i.bodySegment === this.snakeLength+1);
     // Conditonal because the end of the body won't be assigned for initial frame(s) of of game
     if (finalBodySegment) {
       finalBodySegment.element.className = finalBodySegment.element.className
         .replace(` ${this.snakeLength+1} body`, ``);
       finalBodySegment.contains = 'empty';
+      finalBodySegment.bodySegment = null;
    } 
   },
   findBodySegment: function(element) {
     return Number(element.className.match(/ [0-9]+ /)[0]);
   },
-  setTrailingSpaceToEmpty: function() {
-    // Make arr of body elements
-    let bodyGridsArr = gridState.filter(i => i.contains === 'body' && i.bodySegment !== null).map(i => i.element);
-    bodyGridsArr = Array.from(bodyGridsArr);
-    
-    if (bodyGridsArr.length > 0) {
-      // Sort arr to have end of snake first
-      
-      bodyGridsArr = bodyGridsArr.sort((i, j) => {
-        
-        if (this.findBodySegment(i) < this.findBodySegment(j)) {
-          return 1;
-        } 
-        return -1;
-      });
-      // Find end of snake in state and update
-      let rearOfSnakeGridNum = Number(bodyGridsArr[0].className.match(/\d+/)[0]);
-      let gridToUpdate = gridState.find(i => i.elementNum === rearOfSnakeGridNum);
-      
-      // gridToUpdate.bodySegment = null;
-      gridToUpdate.contains = 'empty';
-      gridToUpdate.element.className.replace('body', '');  // Possibly need to also remove bodySegmest from element class
-    }
-  },
-  // removes body/head from squares as snake moves
-  cleanUp: function() {
-    this.removeLastBodySquare();
-    this.setTrailingSpaceToEmpty();
-  },
+
   move: function() {
     this.setDirection();
     this.adjustCoords();
@@ -160,8 +136,7 @@ const food = {
     
     const foodGrid = gridState.find(i => i.contains === 'food');
     // Wipe food from className of current food element.  The conditional yields false only at start of game.
-    if (foodGrid) {      
-      console.log(foodGrid);
+    if (foodGrid) {
       foodGrid.element.className = foodGrid.element.className.replace('food', '');
     }
     // place on a random empty square
