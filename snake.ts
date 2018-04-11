@@ -255,12 +255,14 @@ const handleKeyPress = (keyPressed: string) => {
 const lookupGridStateItem = (x: number, y: number) => gridState.find(grid => grid.x === x && grid.y === y);
 
 const pickRandomCoords = () => {
-  const x = Math.ceil(Math.random()*maxX);
-  const y = Math.ceil(Math.random()*maxY);
+  let x = Math.ceil(Math.random()*maxX);
+  let y = Math.ceil(Math.random()*maxY);
   const gridElement = lookupGridStateItem(x, y);
   // ensure coords point to an empty square
   if (!gridElement || gridElement.contains !== 'empty') {
     let {x, y} = pickRandomCoords();
+    x = x;
+    y = y;
   }
   return {x, y};
 };
