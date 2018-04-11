@@ -103,23 +103,17 @@ const snake = {
       // update state
       currentPosition.contains = 'body';  
       // update DOM
-      if (!currentPosition.element) {
-        throw new Error('No element found');
-      }
+      if (!currentPosition.element) throw new Error('No element found');
       currentPosition.element.className = currentPosition.element.className.replace('head', '');
     }
     
     const nextSnakeLocation: GridStateItem | undefined = lookupGridStateItem(this.x, this.y);
-    if (!nextSnakeLocation) {
-      throw new Error('No location found');
-    }
+    if (!nextSnakeLocation) throw new Error('No location found');
     if (confirmLocationClass(nextSnakeLocation, 'body') || confirmLocationClass(nextSnakeLocation, 'food')) {
       this.handleCollision(nextSnakeLocation);
     } 
     
-    if (!nextSnakeLocation.element) {
-      throw new Error('No element found');
-    }
+    if (!nextSnakeLocation.element) throw new Error('No element found');
     // Update next location in DOM and gridState;
     nextSnakeLocation.element.classList.add('head');
     nextSnakeLocation.contains = 'head';
@@ -127,14 +121,10 @@ const snake = {
   setBodySegment: function() {
     // in state
     let targetInState = lookupGridStateItem(this.x, this.y);
-    if (!targetInState) {
-      throw new Error('No Location Found');
-    }
+    if (!targetInState) throw new Error('No Location Found');
     targetInState.bodySegment = 1;
 
-    if (!targetInState.element) {
-      throw new Error('No element found');
-    }
+    if (!targetInState.element) throw new Error('No element found');
     // in DOM
     targetInState.element.classList.add('1');
   },
@@ -150,9 +140,7 @@ const snake = {
         targetInState.bodySegment += 1; 
         targetInState.contains = 'body';
         
-        if (!targetInState.element) {
-          throw new Error('No element found');
-        }
+        if (!targetInState.element) throw new Error('No element found');
         // update DOM
         targetInState.element.className = targetInState.element.className
           .replace('body', '') // prevents duplicate body classes in html element
@@ -165,9 +153,7 @@ const snake = {
     const finalBodySegment = gridState.find(i => i.bodySegment === this.snakeLength+1);
     // Conditonal because the end of the body won't be assigned for initial frame(s) of of game
     if (finalBodySegment) {
-      if (!finalBodySegment.element) {
-        throw new Error('No element found');
-      }
+      if (!finalBodySegment.element) throw new Error('No element found');
       finalBodySegment.element.className = finalBodySegment.element.className
         .replace(` ${this.snakeLength+1} body`, ``);
       finalBodySegment.contains = 'empty';
@@ -195,11 +181,11 @@ const food = {
     const foodGrid = gridState.find(i => i.contains === 'food');
     // Wipe food from className of current food element.  The conditional yields false only at start of game.
     if (foodGrid) {
-      if (!foodGrid.element) {
-        throw new Error('No element found');
-      }
+      if (!foodGrid.element) throw new Error('No element found');
       foodGrid.element.className = foodGrid.element.className.replace('food', '');
     }
+
+    if (!currentFoodLocation) throw new Error('hurgh!');
     // place on a random empty square
     this.placeOnRandomEmptySquare(currentFoodLocation);
   },
@@ -213,18 +199,14 @@ const food = {
       throw new Error('No Location Found');
     }
     nextFoodLocation.contains = 'food';
-    if (!nextFoodLocation.element) {
-      throw new Error('No element found');
-    }
+    if (!nextFoodLocation.element) throw new Error('No element found');
     nextFoodLocation.element.classList.add(food.name);
   }
 };
 
 // Checks if a given grid square has a class
 const confirmLocationClass = (location: GridStateItem, searchTerm: string) => {
-  if (!location.element) {
-    throw new Error('No element found');
-  }
+  if (!location.element) throw new Error('No element found');
   return location.element.className.search(`${searchTerm}`) > -1;
 }
 
