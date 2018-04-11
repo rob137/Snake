@@ -260,9 +260,9 @@ const pickRandomCoords = () => {
   const gridElement = lookupGridStateItem(x, y);
   // ensure coords point to an empty square
   if (!gridElement || gridElement.contains !== 'empty') {
-    let {x, y} = pickRandomCoords();
-    x = x;
-    y = y;
+    let {a, b} = pickRandomCoords();
+    x = a;
+    y = b;
   }
   return {x, y};
 };
