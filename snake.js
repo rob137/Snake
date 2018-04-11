@@ -1,3 +1,4 @@
+"use strict";
 var gridState = [];
 var maxX, maxY;
 var refreshIntervalId;
@@ -73,21 +74,18 @@ var snake = {
             // update state
             currentPosition.contains = 'body';
             // update DOM
-            if (!currentPosition.element) {
+            if (!currentPosition.element)
                 throw new Error('No element found');
-            }
             currentPosition.element.className = currentPosition.element.className.replace('head', '');
         }
         var nextSnakeLocation = lookupGridStateItem(this.x, this.y);
-        if (!nextSnakeLocation) {
+        if (!nextSnakeLocation)
             throw new Error('No location found');
-        }
         if (confirmLocationClass(nextSnakeLocation, 'body') || confirmLocationClass(nextSnakeLocation, 'food')) {
             this.handleCollision(nextSnakeLocation);
         }
-        if (!nextSnakeLocation.element) {
+        if (!nextSnakeLocation.element)
             throw new Error('No element found');
-        }
         // Update next location in DOM and gridState;
         nextSnakeLocation.element.classList.add('head');
         nextSnakeLocation.contains = 'head';
@@ -95,13 +93,11 @@ var snake = {
     setBodySegment: function () {
         // in state
         var targetInState = lookupGridStateItem(this.x, this.y);
-        if (!targetInState) {
+        if (!targetInState)
             throw new Error('No Location Found');
-        }
         targetInState.bodySegment = 1;
-        if (!targetInState.element) {
+        if (!targetInState.element)
             throw new Error('No element found');
-        }
         // in DOM
         targetInState.element.classList.add('1');
     },
@@ -116,9 +112,8 @@ var snake = {
                 // update state
                 targetInState.bodySegment += 1;
                 targetInState.contains = 'body';
-                if (!targetInState.element) {
+                if (!targetInState.element)
                     throw new Error('No element found');
-                }
                 // update DOM
                 targetInState.element.className = targetInState.element.className
                     .replace('body', '') // prevents duplicate body classes in html element
@@ -135,9 +130,8 @@ var snake = {
         var finalBodySegment = gridState.find(function (i) { return i.bodySegment === _this.snakeLength + 1; });
         // Conditonal because the end of the body won't be assigned for initial frame(s) of of game
         if (finalBodySegment) {
-            if (!finalBodySegment.element) {
+            if (!finalBodySegment.element)
                 throw new Error('No element found');
-            }
             finalBodySegment.element.className = finalBodySegment.element.className
                 .replace(" " + (this.snakeLength + 1) + " body", "");
             finalBodySegment.contains = 'empty';
@@ -163,11 +157,12 @@ var food = {
         var foodGrid = gridState.find(function (i) { return i.contains === 'food'; });
         // Wipe food from className of current food element.  The conditional yields false only at start of game.
         if (foodGrid) {
-            if (!foodGrid.element) {
+            if (!foodGrid.element)
                 throw new Error('No element found');
-            }
             foodGrid.element.className = foodGrid.element.className.replace('food', '');
         }
+        if (!currentFoodLocation)
+            throw new Error('hurgh!');
         // place on a random empty square
         this.placeOnRandomEmptySquare(currentFoodLocation);
     },
@@ -181,17 +176,15 @@ var food = {
             throw new Error('No Location Found');
         }
         nextFoodLocation.contains = 'food';
-        if (!nextFoodLocation.element) {
+        if (!nextFoodLocation.element)
             throw new Error('No element found');
-        }
         nextFoodLocation.element.classList.add(food.name);
     }
 };
 // Checks if a given grid square has a class
 var confirmLocationClass = function (location, searchTerm) {
-    if (!location.element) {
+    if (!location.element)
         throw new Error('No element found');
-    }
     return location.element.className.search("" + searchTerm) > -1;
 };
 // creates gridState, which is used to render grid in DOM
@@ -243,7 +236,9 @@ var pickRandomCoords = function () {
     var gridElement = lookupGridStateItem(x, y);
     // ensure coords point to an empty square
     if (!gridElement || gridElement.contains !== 'empty') {
-        var _a = pickRandomCoords(), x_1 = _a.x, y_1 = _a.y;
+        var altGrids = pickRandomCoords();
+        x = altGrids.x;
+        y = altGrids.y;
     }
     return { x: x, y: y };
 };
